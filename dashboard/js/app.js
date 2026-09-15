@@ -2,6 +2,9 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchPulseData();
 });
 
+// Global variable to store MCP data
+let globalMcpData = null;
+
 async function fetchPulseData() {
     try {
         const response = await fetch('data/latest_pulse.json');
@@ -13,23 +16,11 @@ async function fetchPulseData() {
         const data = await response.json();
         renderDashboard(data);
         
-        // Fetch MCP Sync Metadata if available
+        // Fetch MCP Sync Metadata and store it globally for the login callback
         try {
             const mcpResponse = await fetch('data/mcp_sync.json');
             if (mcpResponse.ok) {
-                const mcpData = await mcpResponse.json();
-                const authEmail = mcpData.authorized_email || '0';
-                
-                if (mcpData.document_id) {
-                    const docBtn = document.getElementById('btn-open-docs');
-                    if (docBtn) docBtn.href = `https://docs.google.com/document/d/${mcpData.document_id}/edit`;
-                }
-                if (mcpData.draft_id) {
-                    const draftBtn = document.getElementById('btn-open-gmail');
-                    // Use u/0 (active session index) because Gmail throws 404 if an email string is passed.
-                    // The dashboard's Google Sign-In gatekeeper already ensures the user is authorized.
-                    if (draftBtn) draftBtn.href = `https://mail.google.com/mail/u/0/#drafts/${mcpData.draft_id}`;
-                }
+                globalMcpData = await mcpResponse.json();
             }
         } catch (e) {
             console.warn('Could not load MCP sync data', e);
@@ -52,6 +43,20 @@ window.handleCredentialResponse = function(response) {
         
         const decoded = JSON.parse(jsonPayload);
         const userEmail = decoded.email;
+        
+        // Dynamically populate the URLs with the EXACT email the user signed in with
+        if (globalMcpData) {
+            if (globalMcpData.document_id) {
+                const docBtn = document.getElementById('btn-open-docs');
+                // Google Docs supports /u/email/ directly
+                if (docBtn) docBtn.href = `https://docs.google.com/document/u/${userEmail}/d/${globalMcpData.document_id}/edit`;
+            }
+            if (globalMcpData.draft_id) {
+                const draftBtn = document.getElementById('btn-open-gmail');
+                // Gmail requires the ?authuser query parameter to safely resolve the session index (avoiding 404s)
+                if (draftBtn) draftBtn.href = `https://mail.google.com/mail/u/?authuser=${userEmail}#drafts/${globalMcpData.draft_id}`;
+            }
+        }
         
         // Hide login container, reveal actual MCP links
         document.getElementById('mcp-login-container').classList.add('hidden');
