@@ -77,7 +77,8 @@ async def _run_mcp_delivery(pulse_content: str) -> str:
     mcp_meta = {
         "document_id": TARGET_GOOGLE_DOC_ID if TARGET_GOOGLE_DOC_ID else None,
         "draft_id": email_res.get('draft_id') if ('email_res' in locals() and email_res.get("success")) else None,
-        "authorized_viewers": AUTHORIZED_VIEWERS if AUTHORIZED_VIEWERS else ""
+        "authorized_viewers": AUTHORIZED_VIEWERS if AUTHORIZED_VIEWERS else "",
+        "email_recipient": EMAIL_RECIPIENT if EMAIL_RECIPIENT else ""
     }
     try:
         import json
