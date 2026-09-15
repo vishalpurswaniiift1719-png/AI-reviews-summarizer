@@ -72,4 +72,19 @@ async def _run_mcp_delivery(pulse_content: str) -> str:
     else:
         results.append("⚠️ Skipped Email Draft (EMAIL_RECIPIENT not set).")
         
+    # 3. Save IDs to dashboard for UI linking
+    mcp_meta = {
+        "document_id": TARGET_GOOGLE_DOC_ID if TARGET_GOOGLE_DOC_ID else None,
+        "draft_id": email_res.get('draft_id') if ('email_res' in locals() and email_res.get("success")) else None
+    }
+    try:
+        import json
+        from pathlib import Path
+        meta_path = Path("dashboard/data/mcp_sync.json")
+        meta_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(meta_path, "w") as f:
+            json.dump(mcp_meta, f)
+    except Exception as e:
+        logger.error(f"Failed to save mcp_sync.json: {e}")
+
     return "\n".join(results)
