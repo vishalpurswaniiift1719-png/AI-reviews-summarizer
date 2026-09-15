@@ -116,9 +116,9 @@ def generate_pulse() -> str:
     }
     
     # Calculate Theme Share
-    for theme, data in themes_data.items():
-        count = data.get("count", 0)
-        data["share"] = round((count / total_reviews * 100)) if total_reviews > 0 else 0
+    for theme in themes_data.get("themes", []):
+        count = theme.get("review_count", 0)
+        theme["share"] = round((count / total_reviews * 100)) if total_reviews > 0 else 0
 
     # Extract Executive Synthesis (first paragraph of pulse)
     synthesis = "No executive synthesis available."
