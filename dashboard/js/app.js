@@ -64,8 +64,9 @@ window.handleCredentialResponse = function(response) {
             }
             if (globalMcpData.draft_id) {
                 const draftBtn = document.getElementById('btn-open-gmail');
-                // Gmail requires the ?authuser query parameter to safely resolve the session index (avoiding 404s)
-                if (draftBtn) draftBtn.href = `https://mail.google.com/mail/u/?authuser=${userEmail}#drafts/${globalMcpData.draft_id}`;
+                // Gmail API draft IDs don't map to web URLs. Link to the Drafts folder
+                // with ?authuser= to force the correct account session.
+                if (draftBtn) draftBtn.href = `https://mail.google.com/mail/?authuser=${userEmail}#drafts`;
             }
         }
         
