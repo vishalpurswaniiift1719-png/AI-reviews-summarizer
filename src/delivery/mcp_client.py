@@ -9,7 +9,7 @@ from contextlib import asynccontextmanager
 from mcp import ClientSession
 from mcp.client.sse import sse_client
 
-from src.config import MCP_SERVER_SSE_URL
+from src.config import MCP_SERVER_SSE_URL, MCP_AUTH_TOKEN
 
 logger = logging.getLogger(__name__)
 
@@ -20,8 +20,10 @@ async def get_mcp_session():
     if not MCP_SERVER_SSE_URL:
         raise ValueError("MCP_SERVER_SSE_URL is not configured.")
         
+    url_with_auth = f"{MCP_SERVER_SSE_URL}?token={MCP_AUTH_TOKEN}"
+        
     logger.info(f"Connecting to MCP Server at {MCP_SERVER_SSE_URL}")
-    async with sse_client(MCP_SERVER_SSE_URL) as streams:
+    async with sse_client(url_with_auth) as streams:
         async with ClientSession(streams[0], streams[1]) as session:
             await session.initialize()
             yield session

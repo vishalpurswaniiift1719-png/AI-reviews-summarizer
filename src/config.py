@@ -100,6 +100,7 @@ REVIEW_WEEKS: int = _int_in_range("REVIEW_WEEKS", default=10, lo=1, hi=52)
 # MCP Servers
 # ---------------------------------------------------------------------------
 MCP_SERVER_SSE_URL: str = _optional("MCP_SERVER_SSE_URL", "https://google-workspace-mcp-production-c1aa.up.railway.app/sse")
+MCP_AUTH_TOKEN: str = _optional("MCP_AUTH_TOKEN", "super_secret_token_123")
 TARGET_GOOGLE_DOC_ID: str = _optional("TARGET_GOOGLE_DOC_ID", "")
 
 
