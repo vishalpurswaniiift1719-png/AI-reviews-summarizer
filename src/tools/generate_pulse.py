@@ -97,6 +97,36 @@ def generate_pulse() -> str:
     with open(output_path, "w", encoding="utf-8") as f:
         f.write(clean_pulse)
         
+    # Calculate Sentiment CSAT
+    pos_count = sum(1 for r in reviews_data if r.get("rating", 0) >= 4)
+    neu_count = sum(1 for r in reviews_data if r.get("rating", 0) == 3)
+    neg_count = sum(1 for r in reviews_data if r.get("rating", 0) <= 2)
+    
+    pos_percent = round((pos_count / total_reviews * 100)) if total_reviews > 0 else 0
+    neu_percent = round((neu_count / total_reviews * 100)) if total_reviews > 0 else 0
+    neg_percent = round((neg_count / total_reviews * 100)) if total_reviews > 0 else 0
+
+    # Calculate Week Number
+    week_number = datetime.now().isocalendar()[1]
+    metadata["week_number"] = week_number
+    metadata["csat"] = {
+        "positive": pos_percent,
+        "neutral": neu_percent,
+        "negative": neg_percent
+    }
+    
+    # Calculate Theme Share
+    for theme, data in themes_data.items():
+        count = data.get("count", 0)
+        data["share"] = round((count / total_reviews * 100)) if total_reviews > 0 else 0
+
+    # Extract Executive Synthesis (first paragraph of pulse)
+    synthesis = "No executive synthesis available."
+    for line in clean_pulse.split('\n'):
+        if line.strip() and not line.startswith('#'):
+            synthesis = line.strip()
+            break
+            
     # Also save the structured payload for the Vercel dashboard
     from src.config import PROJECT_ROOT
     dashboard_data_path = PROJECT_ROOT / "dashboard" / "data" / "latest_pulse.json"
@@ -106,6 +136,7 @@ def generate_pulse() -> str:
         "metadata": metadata,
         "themes": themes_data,
         "markdown_pulse": clean_pulse,
+        "executive_synthesis": synthesis,
         "generated_at": datetime.now().isoformat()
     }
     

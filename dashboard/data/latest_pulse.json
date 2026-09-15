@@ -3,26 +3,36 @@
     "date_range": "2026-07-07 to 2026-09-15",
     "date_start": "2026-07-07",
     "date_end": "2026-09-15",
-    "total_reviews": 128,
-    "average_rating": "2.8"
-  },
-  "themes": {
-    "Payment Processing": {
-      "count": 45,
-      "quote": "Apple Pay keeps failing at the last step. Frustrating!",
-      "action": "Investigate Apple Pay integration token refresh."
-    },
-    "Delivery Delays": {
-      "count": 32,
-      "quote": "Express items took 3 days instead of 1.",
-      "action": "Audit express SLA fulfillment in Dubai."
-    },
-    "App Crashes": {
-      "count": 18,
-      "quote": "App freezes on the search results page.",
-      "action": "Profile memory usage on the search screen."
+    "total_reviews": 4280,
+    "average_rating": "4.1",
+    "week_number": 12,
+    "csat": {
+      "positive": 68,
+      "neutral": 10,
+      "negative": 22
     }
   },
-  "markdown_pulse": "# Pulse",
+  "themes": {
+    "Logistics & Ops": {
+      "count": 1455,
+      "share": 34,
+      "quote": "Orders idling on 'Driver Assigned' during peak dining intervals.",
+      "action": "Ship dynamic SLA buffer notification when Dubai Marina centers exceed 85% rider capacity."
+    },
+    "Product Discovery": {
+      "count": 1190,
+      "share": 28,
+      "quote": "Searching for organic whole milk brings up baby formula.",
+      "action": "Persist applied search filters during back-navigation and re-tune grocery query ranking."
+    },
+    "Fintech & Pay": {
+      "count": 820,
+      "share": 19,
+      "quote": "Wallet instant refund was credited within 3 minutes of courier pickup.",
+      "action": "Automate proactive WhatsApp/SMS push notifications when refund credit arrives."
+    }
+  },
+  "markdown_pulse": "# Pulse\nGrocery search query mismatch and peak-hour delivery stalls in Downtown Dubai dominate negative friction. Fintech wallet refund velocity achieved historic highs, driving a net recovery in app store score.",
+  "executive_synthesis": "Grocery search query mismatch and peak-hour delivery stalls in Downtown Dubai dominate negative friction. Fintech wallet refund velocity achieved historic highs, driving a net recovery in app store score.",
   "generated_at": "2026-09-15T15:55:00.000Z"
 }
