@@ -100,7 +100,7 @@ window.handleCredentialResponse = function(response) {
         if (globalMcpData) {
             if (globalMcpData.document_id) {
                 const docBtn = document.getElementById('btn-open-docs');
-                if (docBtn) docBtn.href = `https://docs.google.com/document/u/${userEmail}/d/${globalMcpData.document_id}/edit`;
+                if (docBtn) docBtn.href = `https://docs.google.com/document/d/${globalMcpData.document_id}/edit?authuser=${encodeURIComponent(userEmail)}`;
             }
             // Build Gmail compose URL dynamically from the latest pulse data
             const draftBtn = document.getElementById('btn-open-gmail');
