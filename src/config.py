@@ -15,17 +15,15 @@ from dotenv import load_dotenv
 # Locate and load .env
 # ---------------------------------------------------------------------------
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
+# Locate and load .env if it exists (for local development)
+# In production (e.g. Railway), environment variables are injected directly by the host.
 ENV_PATH = PROJECT_ROOT / ".env"
-
-if not ENV_PATH.exists():
-    print(
-        "❌ .env file not found.\n"
-        "   Copy .env.example to .env and fill in your keys:\n"
-        f"   cp {PROJECT_ROOT / '.env.example'} {ENV_PATH}"
-    )
-    sys.exit(1)
-
-load_dotenv(ENV_PATH)
+if ENV_PATH.exists():
+    load_dotenv(ENV_PATH)
+else:
+    # We don't crash here because cloud providers inject env vars directly without a .env file.
+    # We just rely on os.getenv() to pick them up.
+    pass
 
 
 # ---------------------------------------------------------------------------
