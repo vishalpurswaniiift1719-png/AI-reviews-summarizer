@@ -110,6 +110,7 @@ TARGET_GOOGLE_DOC_ID: str = _optional("TARGET_GOOGLE_DOC_ID", "")
 PULSE_DOC_TITLE: str = _optional("PULSE_DOC_TITLE", "Noon App Pulse")
 EMAIL_RECIPIENT: str = _optional("EMAIL_RECIPIENT", "team@example.com")
 EMAIL_SUBJECT: str = _optional("EMAIL_SUBJECT", "Weekly Noon App Pulse — {date}")
+AUTHORIZED_VIEWERS: str = _optional("AUTHORIZED_VIEWERS", "")
 
 # ---------------------------------------------------------------------------
 # Data directories (auto-created)

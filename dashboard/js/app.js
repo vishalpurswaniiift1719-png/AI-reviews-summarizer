@@ -44,7 +44,18 @@ window.handleCredentialResponse = function(response) {
         const decoded = JSON.parse(jsonPayload);
         const userEmail = decoded.email;
         
-        // Dynamically populate the URLs with the EXACT email the user signed in with
+        // 1. Verify against explicit whitelist (if provided by backend)
+        if (globalMcpData && globalMcpData.authorized_viewers) {
+            const allowedViewers = globalMcpData.authorized_viewers.split(',').map(e => e.trim().toLowerCase());
+            if (!allowedViewers.includes(userEmail.toLowerCase())) {
+                const errEl = document.getElementById('mcp-auth-error');
+                errEl.textContent = `Access Denied: ${userEmail} is not an authorized executive.`;
+                errEl.classList.remove('hidden');
+                return; // Stop execution, leave links hidden
+            }
+        }
+        
+        // 2. Dynamically populate the URLs with the EXACT email the user signed in with
         if (globalMcpData) {
             if (globalMcpData.document_id) {
                 const docBtn = document.getElementById('btn-open-docs');
@@ -58,7 +69,8 @@ window.handleCredentialResponse = function(response) {
             }
         }
         
-        // Hide login container, reveal actual MCP links
+        // 3. Hide login container, reveal actual MCP links
+        document.getElementById('mcp-auth-error').classList.add('hidden');
         document.getElementById('mcp-login-container').classList.add('hidden');
         document.getElementById('mcp-links-wrapper').classList.remove('hidden');
         document.getElementById('mcp-auth-email').textContent = `Authenticated as ${userEmail}`;
