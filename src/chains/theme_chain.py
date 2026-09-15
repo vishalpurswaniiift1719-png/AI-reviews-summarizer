@@ -43,7 +43,7 @@ class ActionOutput(BaseModel):
 def get_llm():
     """Initialize the Gemini LLM."""
     return ChatGoogleGenerativeAI(
-        model="gemini-2.5-flash",
+        model="gemini-3.6-flash",
         temperature=0.1,  # Low temp for deterministic clustering
         api_key=GEMINI_API_KEY,
         max_retries=3
@@ -134,7 +134,11 @@ def run_action_generation(top_themes: List[Dict[str, Any]]) -> List[Dict[str, An
     
     # Extract only necessary info for the prompt
     themes_summary = [
-        {"theme_name": t["theme_name"], "description": t["description"], "quote": t["representative_quote"]}
+        {
+            "theme_name": t.get("theme_name", t.get("name", "Unknown Theme")), 
+            "description": t.get("description", ""), 
+            "quote": t.get("representative_quote", t.get("quote", ""))
+        }
         for t in top_themes
     ]
     

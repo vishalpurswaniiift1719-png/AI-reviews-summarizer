@@ -243,7 +243,7 @@ graph LR
 | **Templating** | Jinja2 or Python f-strings | Pulse document formatting. |
 | **MCP Client** | MCP SDK (Python) | Call Google Docs and Gmail MCP servers. |
 | **Orchestration** | LangChain Agent + CLI entry-point | LangChain agent drives the pipeline; single `main.py` to launch. |
-| **Scheduling (optional)** | Cron / Task Scheduler / GitHub Actions | Automate weekly runs. |
+| **Scheduling** | GitHub Actions | Automate weekly runs (Sundays at 10 PM UAE time). |
 
 ---
 
@@ -251,7 +251,7 @@ graph LR
 
 ```mermaid
 sequenceDiagram
-    participant Cron as Scheduler (Weekly)
+    participant Cron as GitHub Actions (Weekly)
     participant Agent as LangChain Agent
     participant Ingest as Ingestion Tool
     participant Process as Processing Tool
@@ -462,6 +462,5 @@ agent_executor = AgentExecutor(agent=agent, tools=tools)
 | **Interactive Dashboard** | Web UI to explore reviews, themes, and historical pulses. |
 | **Slack Integration** | Post the pulse to a Slack channel via MCP or webhook. |
 | **Competitor Analysis** | Ingest competitor app reviews for comparative insights. |
-| **Automated Scheduling** | GitHub Actions or cloud function to run the pipeline weekly without manual trigger. |
 | **LangGraph Stateful Agent** | Migrate from `AgentExecutor` to a LangGraph `StateGraph` for conditional branching and human-in-the-loop approval. |
 | **Apple App Store** | Add App Store review ingestion as an additional source when needed. |

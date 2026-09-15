@@ -361,71 +361,59 @@ def enforce_word_limit(pulse_text: str, max_words: int = 250) -> str:
 ## Phase 6: MCP Delivery (Google Docs + Gmail)
 
 ### Objective
-Integrate with Google Docs and Gmail via MCP servers to publish the pulse and create a draft email.
+Integrate our LangChain agent with the externally deployed Google Workspace MCP server (`https://google-workspace-mcp-production-c1aa.up.railway.app`) to append the pulse note to a Google Doc and create a Gmail draft.
+
+> **[!IMPORTANT]**
+> The MCP server provides `google_doc_append` and `gmail_create_draft` tools. Since it appends rather than creates a new doc, we will need a target `GOOGLE_DOC_ID` in our `.env` configuration representing a rolling "Weekly Pulses" document.
 
 ### Tasks
 
-#### 6.1 MCP Server Setup
-- Identify and configure MCP servers for Google Docs and Gmail.
-- Verify MCP servers are accessible at the configured URLs.
-- Test authentication flow (handled internally by MCP servers).
+#### 6.1 Update Configuration (`src/config.py`)
+Add necessary environment variables to connect to the SSE-based MCP Server and target specific resources:
+- `MCP_SERVER_SSE_URL`: `https://google-workspace-mcp-production-c1aa.up.railway.app/sse`
+- `TARGET_GOOGLE_DOC_ID`: The ID of the Google Doc to append the weekly pulse to.
 
-#### 6.2 Create `src/delivery/mcp_docs.py`
-MCP client for Google Docs:
+#### 6.2 Create `src/delivery/mcp_client.py`
+Build a centralized MCP client using the official `mcp` Python SDK:
 ```python
-async def create_or_update_doc(pulse_content: str, title: str) -> str:
-    """Create a new Google Doc or update existing with the pulse content.
-    Returns the shareable document URL."""
-    # Connect to MCP Docs server
-    # Call docs.create or docs.update tool
-    # Return document URL
+from mcp import ClientSession
+from mcp.client.sse import sse_client
+
+async def get_mcp_session():
+    """Establish an SSE connection to the Railway MCP Server."""
+    transport = sse_client(config.MCP_SERVER_SSE_URL)
+    # Return initialized session
+    
+async def append_to_doc(text: str) -> str:
+    """Calls google_doc_append tool via MCP."""
+    
+async def draft_email(subject: str, body: str, to: str) -> str:
+    """Calls gmail_create_draft tool via MCP."""
 ```
 
-#### 6.3 Create `src/tools/publish_doc.py`
-LangChain tool wrapping the MCP Docs client:
-```python
-@tool
-def publish_to_docs(pulse_content: str) -> str:
-    """Publish the weekly pulse to Google Docs via MCP."""
-    url = create_or_update_doc(pulse_content, config.PULSE_DOC_TITLE)
-    return f"Pulse published to Google Docs: {url}"
-```
-
-#### 6.4 Create `src/delivery/mcp_gmail.py`
-MCP client for Gmail:
-```python
-async def create_draft(subject: str, body: str, to: str) -> str:
-    """Create a Gmail draft with the pulse content.
-    Returns confirmation message."""
-    # Connect to MCP Gmail server
-    # Call gmail.create_draft tool
-    # Return draft ID / confirmation
-```
-
-#### 6.5 Create `src/tools/draft_email.py`
-LangChain tool wrapping the MCP Gmail client:
+#### 6.3 Create `src/tools/publish_mcp.py`
+Expose the MCP actions to the agent as LangChain tools:
 ```python
 @tool
-def draft_email(pulse_content: str, doc_url: str) -> str:
-    """Create a Gmail draft containing the pulse and a link to the Google Doc."""
-    subject = config.EMAIL_SUBJECT.format(date=today)
-    body = f"{pulse_content}\n\n📄 Full document: {doc_url}"
-    create_draft(subject, body, config.EMAIL_RECIPIENT)
-    return f"Gmail draft created for {config.EMAIL_RECIPIENT}"
+def publish_and_draft_pulse(pulse_content: str) -> str:
+    """
+    Appends the pulse to the rolling Google Doc and creates a Gmail draft 
+    using the deployed MCP server.
+    """
+    # 1. append_to_doc(pulse_content)
+    # 2. draft_email(subject, pulse_content, to)
+    # Return success summary
 ```
 
-#### 6.6 Fallback Handling
-- If MCP server is unreachable: retry 3 times with exponential backoff.
-- If Google Doc creation fails: save pulse as local markdown file.
-- If Gmail draft fails: save email body locally and log error.
+#### 6.4 Fallback Handling
+- If the MCP server is unreachable via SSE, gracefully fallback to saving the pulse as a local markdown file and print a warning.
 
 ### Exit Criteria
-- [ ] MCP Docs server is connected and authenticated.
-- [ ] Pulse is successfully created as a Google Doc with correct formatting.
-- [ ] Document URL is returned and valid.
-- [ ] MCP Gmail server is connected and authenticated.
-- [ ] Gmail draft is created with the pulse content and Doc link.
-- [ ] Fallback saves local files when MCP servers are unavailable.
+- [ ] `MCP_SERVER_SSE_URL` and `TARGET_GOOGLE_DOC_ID` added to configuration.
+- [ ] SSE Client connects successfully to the deployed Railway MCP server.
+- [ ] Pulse is appended to the specified Google Doc via `google_doc_append`.
+- [ ] Gmail draft is created via `gmail_create_draft`.
+- [ ] If network fails, gracefully falls back to local save.
 
 ---
 
@@ -582,6 +570,38 @@ __pycache__/
 
 ---
 
+## Phase 9: GitHub Actions Automation
+
+### Objective
+Create a CI/CD pipeline using GitHub Actions to run the full LangChain orchestration agent automatically every week to pull the latest reviews, summarize, and deliver via MCP.
+
+### Tasks
+
+#### 9.1 Create Workflow File
+Create `.github/workflows/weekly_pulse.yml`:
+- Set `on.schedule` to `cron: '0 18 * * 0'` (Sunday 18:00 UTC = 22:00 UAE local time).
+- Add `workflow_dispatch` trigger for manual runs.
+
+#### 9.2 Configure Environment
+Define the GitHub Action step to:
+- Checkout repository (`actions/checkout`).
+- Setup Python 3.12 (`actions/setup-python`).
+- Install dependencies via `pip install -r requirements.txt`.
+- Execute `python src/main.py`.
+
+#### 9.3 Secrets Configuration Guide
+Document the necessary GitHub Secrets that must be populated:
+- `GEMINI_API_KEY`
+- `MCP_SERVER_SSE_URL`
+- `TARGET_GOOGLE_DOC_ID`
+- `EMAIL_RECIPIENT`
+
+### Exit Criteria
+- [ ] `.github/workflows/weekly_pulse.yml` is created and validated for YAML syntax.
+- [ ] Cron schedule matches Sunday 10 PM UAE time correctly.
+
+---
+
 ## Dependency Graph
 
 ```mermaid
@@ -594,6 +614,7 @@ graph LR
     P5 --> P7["Phase 7<br/>Agent Orchestration"]
     P6 --> P7
     P7 --> P8["Phase 8<br/>Testing & Docs"]
+    P8 --> P9["Phase 9<br/>GitHub Automation"]
 ```
 
 > [!NOTE]

@@ -26,23 +26,24 @@ if str(PROJECT_ROOT) not in sys.path:
 
 def main() -> None:
     """Entry point for the AI Reviews Summarizer pipeline."""
-
-    # 1. Load and validate configuration (this also creates data dirs)
-    from src.config import print_config_summary  # noqa: E402
+    from src.config import print_config_summary
+    from src.agent import get_agent_executor
 
     print()
     print_config_summary()
     print()
-    print("Setup OK -- all dependencies loaded, config validated, directories created.")
-    print()
-    print("Next steps:")
-    print("  • Phase 2: Implement review ingestion  (src/tools/fetch_reviews.py)")
-    print("  • Phase 3: Implement data processing   (src/processing/)")
-    print("  • Phase 4: Implement theme clustering   (src/chains/theme_chain.py)")
-    print("  • Phase 5: Implement pulse generation   (src/tools/generate_pulse.py)")
-    print("  • Phase 6: Implement MCP delivery       (src/delivery/)")
-    print("  • Phase 7: Wire up the LangChain agent  (src/agent.py)")
-    print()
+    print("Starting LangChain Agent Orchestrator...")
+    
+    agent_executor = get_agent_executor()
+    
+    result = agent_executor.invoke({
+        "input": "Generate this week's Noon app review pulse."
+    })
+    
+    print("\n" + "="*50)
+    print("Agent Execution Finished")
+    print("="*50)
+    print(result.get("output", ""))
 
 
 if __name__ == "__main__":

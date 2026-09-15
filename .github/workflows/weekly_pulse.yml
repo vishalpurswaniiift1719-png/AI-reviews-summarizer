@@ -1,0 +1,36 @@
+name: Weekly Noon App Pulse
+
+on:
+  schedule:
+    # 18:00 UTC is 10:00 PM (22:00) UAE local time
+    - cron: '0 18 * * 0'
+  workflow_dispatch:
+    # Allows manual triggering from the GitHub Actions UI
+
+jobs:
+  run-agent:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run LangChain Agent Pipeline
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          MCP_SERVER_SSE_URL: ${{ secrets.MCP_SERVER_SSE_URL }}
+          TARGET_GOOGLE_DOC_ID: ${{ secrets.TARGET_GOOGLE_DOC_ID }}
+          EMAIL_RECIPIENT: ${{ secrets.EMAIL_RECIPIENT }}
+        run: |
+          python src/main.py
