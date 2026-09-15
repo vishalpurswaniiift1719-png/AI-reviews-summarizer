@@ -75,7 +75,8 @@ async def _run_mcp_delivery(pulse_content: str) -> str:
     # 3. Save IDs to dashboard for UI linking
     mcp_meta = {
         "document_id": TARGET_GOOGLE_DOC_ID if TARGET_GOOGLE_DOC_ID else None,
-        "draft_id": email_res.get('draft_id') if ('email_res' in locals() and email_res.get("success")) else None
+        "draft_id": email_res.get('draft_id') if ('email_res' in locals() and email_res.get("success")) else None,
+        "authorized_email": EMAIL_RECIPIENT if EMAIL_RECIPIENT else None
     }
     try:
         import json

@@ -18,15 +18,16 @@ async function fetchPulseData() {
             const mcpResponse = await fetch('data/mcp_sync.json');
             if (mcpResponse.ok) {
                 const mcpData = await mcpResponse.json();
+                const authEmail = mcpData.authorized_email || '0';
+                
                 if (mcpData.document_id) {
                     const docBtn = document.querySelector('a[href*="docs.google.com/document/"]');
-                    if (docBtn) docBtn.href = `https://docs.google.com/document/d/${mcpData.document_id}/edit`;
+                    if (docBtn) docBtn.href = `https://docs.google.com/document/u/${authEmail}/d/${mcpData.document_id}/edit`;
                 }
                 if (mcpData.draft_id) {
                     const draftBtn = document.querySelector('a[href*="mail.google.com/mail/"]');
-                    // Linking to #drafts/ID instead of ?compose=ID ensures unauthorized users 
-                    // get a "Conversation not found" error instead of a blank new email.
-                    if (draftBtn) draftBtn.href = `https://mail.google.com/mail/u/0/#drafts/${mcpData.draft_id}`;
+                    // Force Gmail to evaluate the authorized email. If not logged in, it redirects to login.
+                    if (draftBtn) draftBtn.href = `https://mail.google.com/mail/u/${authEmail}/#drafts/${mcpData.draft_id}`;
                 }
             }
         } catch (e) {
