@@ -21,11 +21,11 @@ async function fetchPulseData() {
                 const authEmail = mcpData.authorized_email || '0';
                 
                 if (mcpData.document_id) {
-                    const docBtn = document.querySelector('a[href*="docs.google.com/document/"]');
+                    const docBtn = document.getElementById('btn-open-docs');
                     if (docBtn) docBtn.href = `https://docs.google.com/document/u/${authEmail}/d/${mcpData.document_id}/edit`;
                 }
                 if (mcpData.draft_id) {
-                    const draftBtn = document.querySelector('a[href*="mail.google.com/mail/"]');
+                    const draftBtn = document.getElementById('btn-open-gmail');
                     // Force Gmail to evaluate the authorized email. If not logged in, it redirects to login.
                     if (draftBtn) draftBtn.href = `https://mail.google.com/mail/u/${authEmail}/#drafts/${mcpData.draft_id}`;
                 }
@@ -37,6 +37,31 @@ async function fetchPulseData() {
         console.error('Error fetching pulse data:', error);
         document.getElementById('themes-container').innerHTML = 
             `<div style="color: var(--error); padding: 1rem;">Failed to load pulse data. Is latest_pulse.json generated?</div>`;
+    }
+}
+
+// Google Sign-In Callback
+window.handleCredentialResponse = function(response) {
+    try {
+        const base64Url = response.credential.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        
+        const decoded = JSON.parse(jsonPayload);
+        const userEmail = decoded.email;
+        
+        // Hide login container, reveal actual MCP links
+        document.getElementById('mcp-login-container').classList.add('hidden');
+        document.getElementById('mcp-links-wrapper').classList.remove('hidden');
+        document.getElementById('mcp-auth-email').textContent = `Authenticated as ${userEmail}`;
+        
+    } catch (e) {
+        console.error("Authentication decode error", e);
+        const errEl = document.getElementById('mcp-auth-error');
+        errEl.textContent = "Authentication failed. Please try again.";
+        errEl.classList.remove('hidden');
     }
 }
 
