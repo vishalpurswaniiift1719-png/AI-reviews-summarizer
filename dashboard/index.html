@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Noon App Weekly Pulse</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600;700&family=Outfit:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <header class="pulse-header">
+            <div class="header-content">
+                <div class="brand-lockup">
+                    <div class="brand-square"></div>
+                    <h1>Noon App Pulse</h1>
+                </div>
+                <div class="meta-info">
+                    <div class="mcp-status">
+                        <span class="status-dot"></span>
+                        <span class="status-text">MCP: LIVE</span>
+                    </div>
+                    <span id="date-range" class="pill data-pill">Loading...</span>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <!-- KPI Row -->
+            <section class="kpi-row">
+                <div class="kpi-card">
+                    <div class="kpi-label">REVIEWS PROCESSED</div>
+                    <div class="kpi-value" id="kpi-total">--</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">AVG RATING</div>
+                    <div class="kpi-value" id="kpi-rating">--</div>
+                </div>
+            </section>
+
+            <!-- Main Stream -->
+            <div class="grid-layout">
+                <div class="primary-stream">
+                    <section class="themes-section">
+                        <h2 class="section-title">🔥 Top Themes This Week</h2>
+                        <div id="themes-container" class="themes-container">
+                            <!-- Populated by JS -->
+                            <div class="loading">Loading insights...</div>
+                        </div>
+                    </section>
+                </div>
+                
+                <div class="sidebar-stream">
+                    <section class="actions-section">
+                        <h2 class="section-title">💡 Action Items</h2>
+                        <div id="actions-container" class="actions-container">
+                            <!-- Populated by JS -->
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Templates -->
+    <template id="theme-card-template">
+        <div class="theme-card">
+            <div class="theme-header">
+                <h3 class="theme-name"></h3>
+                <span class="theme-count data-pill"></span>
+            </div>
+            <div class="theme-quote">
+                <p class="quote-text"></p>
+                <span class="quote-tag">User Voice</span>
+            </div>
+        </div>
+    </template>
+    
+    <template id="action-item-template">
+        <div class="action-item">
+            <p class="action-text"></p>
+        </div>
+    </template>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

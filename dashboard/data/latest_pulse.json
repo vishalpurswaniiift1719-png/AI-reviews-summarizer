@@ -1,0 +1,28 @@
+{
+  "metadata": {
+    "date_range": "2026-07-07 to 2026-09-15",
+    "date_start": "2026-07-07",
+    "date_end": "2026-09-15",
+    "total_reviews": 128,
+    "average_rating": "2.8"
+  },
+  "themes": {
+    "Payment Processing": {
+      "count": 45,
+      "quote": "Apple Pay keeps failing at the last step. Frustrating!",
+      "action": "Investigate Apple Pay integration token refresh."
+    },
+    "Delivery Delays": {
+      "count": 32,
+      "quote": "Express items took 3 days instead of 1.",
+      "action": "Audit express SLA fulfillment in Dubai."
+    },
+    "App Crashes": {
+      "count": 18,
+      "quote": "App freezes on the search results page.",
+      "action": "Profile memory usage on the search screen."
+    }
+  },
+  "markdown_pulse": "# Pulse",
+  "generated_at": "2026-09-15T15:55:00.000Z"
+}

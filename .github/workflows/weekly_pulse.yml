@@ -34,3 +34,11 @@ jobs:
           EMAIL_RECIPIENT: ${{ secrets.EMAIL_RECIPIENT }}
         run: |
           python src/main.py
+          
+      - name: Commit Dashboard Data to Repo
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add dashboard/data/latest_pulse.json
+          git commit -m "chore: update weekly pulse data for vercel [skip ci]" || echo "No changes to commit"
+          git push

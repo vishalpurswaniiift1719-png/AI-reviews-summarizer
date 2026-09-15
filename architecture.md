@@ -15,7 +15,7 @@ The AI Reviews Summarizer is a **LangChain-powered AI agent** that ingests publi
 └─────────────┘     └──────────────┘     └──────────────┘     └────────────┘     └────────────┘
   Google Play         Clean, filter,       LLM-based            Weekly note        Google Docs
   (public data)       normalize,           clustering            ≤250 words         Gmail Draft
-                      PII strip            (≤5 themes)           Top 3 themes
+                      PII strip            (≤5 themes)           Top 3 themes       Vercel UI
 ```
 
 ---
@@ -49,11 +49,12 @@ graph TD
         PULSE["Weekly Pulse Document<br/>(≤250 words)"]
     end
 
-    subgraph Delivery["5 · Delivery via MCP"]
+    subgraph Delivery["5 · Delivery via MCP & Vercel"]
         MCP_DOCS["MCP Server:<br/>Google Docs"]
         MCP_GMAIL["MCP Server:<br/>Gmail"]
         GDOC["Google Doc<br/>(published pulse)"]
         DRAFT["Gmail Draft<br/>(notification email)"]
+        UI["Vercel Dashboard<br/>(Visual Pulse)"]
     end
 
     AGENT --> GP
@@ -62,6 +63,7 @@ graph TD
     AGENT --> TPL
     AGENT --> MCP_DOCS
     AGENT --> MCP_GMAIL
+    AGENT --> UI
 
     GP --> NORM
     NORM --> PII
@@ -222,6 +224,13 @@ graph LR
 | 1 | `gmail.create_draft` | Create a draft email with the pulse content in the body and/or a link to the Google Doc. |
 | 2 | — | The user reviews and sends the draft manually. |
 
+#### Vercel Dashboard Delivery:
+| Step | Action | Description |
+| :--- | :--- | :--- |
+| 1 | File write | The agent writes a `latest_pulse.json` to the `dashboard/data/` directory. |
+| 2 | GitHub Actions | The CI/CD pipeline commits the new JSON payload to the repository. |
+| 3 | Vercel Deploy | Vercel detects the commit and serves the updated HTML dashboard automatically. |
+
 #### Why MCP (Not Direct API):
 - **No OAuth client code** — MCP servers handle authentication internally.
 - **No REST plumbing** — The app calls high-level MCP tools, not raw HTTP endpoints.
@@ -335,6 +344,12 @@ AI reviews summarizer/
 │   ├── raw/                     # Raw review exports (auto-generated)
 │   ├── processed/               # Cleaned review data (auto-generated)
 │   └── pulses/                  # Generated pulse documents (archive)
+│
+├── dashboard/
+│   ├── index.html               # Vercel frontend HTML
+│   ├── css/style.css            # Vercel frontend styles
+│   ├── js/app.js                # Vercel frontend logic
+│   └── data/                    # JSON data synced by GitHub Actions
 │
 ├── tests/
 │   ├── test_tools.py

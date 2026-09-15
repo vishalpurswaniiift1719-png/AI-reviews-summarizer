@@ -97,4 +97,19 @@ def generate_pulse() -> str:
     with open(output_path, "w", encoding="utf-8") as f:
         f.write(clean_pulse)
         
-    return f"Successfully generated pulse note ({len(clean_pulse.split())} words). Saved to data/pulses/{output_filename}"
+    # Also save the structured payload for the Vercel dashboard
+    from src.config import PROJECT_ROOT
+    dashboard_data_path = PROJECT_ROOT / "dashboard" / "data" / "latest_pulse.json"
+    dashboard_data_path.parent.mkdir(parents=True, exist_ok=True)
+    
+    dashboard_payload = {
+        "metadata": metadata,
+        "themes": themes_data,
+        "markdown_pulse": clean_pulse,
+        "generated_at": datetime.now().isoformat()
+    }
+    
+    with open(dashboard_data_path, "w", encoding="utf-8") as f:
+        json.dump(dashboard_payload, f, indent=2, ensure_ascii=False)
+        
+    return f"Successfully generated pulse note ({len(clean_pulse.split())} words). Saved to data/pulses/{output_filename} and dashboard/data/latest_pulse.json"

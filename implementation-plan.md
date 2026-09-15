@@ -602,6 +602,23 @@ Document the necessary GitHub Secrets that must be populated:
 
 ---
 
+## Phase 10: Executive Dashboard (Vercel)
+
+### Objective
+Create a mobile-first web dashboard to visualize the weekly pulse and host it on Vercel.
+
+### Tasks
+- Create `dashboard/index.html`, `style.css`, and `app.js` using Vanilla web technologies based on `DESIGN.md`.
+- Modify `generate_pulse.py` to output `latest_pulse.json`.
+- Add a `vercel.json` for Vercel configuration.
+- Update GitHub Actions to commit the JSON data payload back to the repo to trigger Vercel deployments.
+
+### Exit Criteria
+- [ ] Dashboard is responsive and styled according to `DESIGN.md`.
+- [ ] GitHub Action successfully commits the JSON file.
+
+---
+
 ## Dependency Graph
 
 ```mermaid
