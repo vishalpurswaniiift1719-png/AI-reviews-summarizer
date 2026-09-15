@@ -36,14 +36,21 @@ def main() -> None:
     
     agent_executor = get_agent_executor()
     
-    result = agent_executor.invoke({
-        "input": "Generate this week's Noon app review pulse."
-    })
+    try:
+        result = agent_executor.invoke({
+            "input": "Generate this week's Noon app review pulse."
+        })
+    except Exception as e:
+        print(f"\nPipeline failed: {e}", flush=True)
+        sys.exit(1)
     
     print("\n" + "="*50)
     print("Agent Execution Finished")
     print("="*50)
-    print(result.get("output", ""))
+    
+    # Safely print to Windows console which may have cp1252 encoding
+    output_text = result.get("output", "")
+    print(output_text.encode('ascii', 'replace').decode('ascii'))
 
 
 if __name__ == "__main__":
