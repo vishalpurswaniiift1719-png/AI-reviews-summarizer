@@ -24,7 +24,9 @@ async function fetchPulseData() {
                 }
                 if (mcpData.draft_id) {
                     const draftBtn = document.querySelector('a[href*="mail.google.com/mail/"]');
-                    if (draftBtn) draftBtn.href = `https://mail.google.com/mail/u/0/#drafts?compose=${mcpData.draft_id}`;
+                    // Linking to #drafts/ID instead of ?compose=ID ensures unauthorized users 
+                    // get a "Conversation not found" error instead of a blank new email.
+                    if (draftBtn) draftBtn.href = `https://mail.google.com/mail/u/0/#drafts/${mcpData.draft_id}`;
                 }
             }
         } catch (e) {
