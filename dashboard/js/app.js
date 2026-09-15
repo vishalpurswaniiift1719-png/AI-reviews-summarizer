@@ -22,12 +22,13 @@ async function fetchPulseData() {
                 
                 if (mcpData.document_id) {
                     const docBtn = document.getElementById('btn-open-docs');
-                    if (docBtn) docBtn.href = `https://docs.google.com/document/u/${authEmail}/d/${mcpData.document_id}/edit`;
+                    if (docBtn) docBtn.href = `https://docs.google.com/document/d/${mcpData.document_id}/edit`;
                 }
                 if (mcpData.draft_id) {
                     const draftBtn = document.getElementById('btn-open-gmail');
-                    // Force Gmail to evaluate the authorized email. If not logged in, it redirects to login.
-                    if (draftBtn) draftBtn.href = `https://mail.google.com/mail/u/${authEmail}/#drafts/${mcpData.draft_id}`;
+                    // Use u/0 (active session index) because Gmail throws 404 if an email string is passed.
+                    // The dashboard's Google Sign-In gatekeeper already ensures the user is authorized.
+                    if (draftBtn) draftBtn.href = `https://mail.google.com/mail/u/0/#drafts/${mcpData.draft_id}`;
                 }
             }
         } catch (e) {
