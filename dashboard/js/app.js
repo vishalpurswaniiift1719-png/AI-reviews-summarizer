@@ -191,6 +191,80 @@ function renderDashboard(data) {
             actionsContainer.appendChild(clone);
         }
     });
+
+    // 5. Render Customer Voice Feed (Top Reviews)
+    const voiceContainer = document.getElementById('customer-voice-container');
+    const voiceTemplate = document.getElementById('review-card-template');
+    
+    if (voiceContainer && voiceTemplate && data.themes && data.themes.top_reviews) {
+        voiceContainer.innerHTML = '';
+        const topReviews = data.themes.top_reviews;
+        
+        topReviews.forEach(review => {
+            const clone = voiceTemplate.content.cloneNode(true);
+            
+            // Set Rating Stars
+            const rating = parseInt(review.rating) || 0;
+            let starsHtml = '';
+            for (let i = 0; i < 5; i++) {
+                if (i < rating) {
+                    starsHtml += `<span>★</span>`;
+                } else {
+                    starsHtml += `<span class="text-surface-container-highest">★</span>`;
+                }
+            }
+            clone.querySelector('.review-stars').innerHTML = starsHtml;
+            
+            // Rating Text
+            const ratingEl = clone.querySelector('.review-rating');
+            ratingEl.textContent = `${rating}/5 Stars`;
+            if (rating <= 2) {
+                ratingEl.classList.add('text-error');
+            } else if (rating === 5) {
+                ratingEl.classList.add('text-tertiary');
+            }
+            
+            // Source & Date
+            if (review.source === 'google_play') {
+                clone.querySelector('.review-source').textContent = 'Google Play Review';
+            }
+            
+            if (review.date) {
+                const dateObj = new Date(review.date);
+                if (!isNaN(dateObj)) {
+                    clone.querySelector('.review-date').textContent = dateObj.toLocaleDateString();
+                } else {
+                    clone.querySelector('.review-date').textContent = review.date;
+                }
+            }
+            
+            // Text
+            clone.querySelector('.review-text').textContent = `"${review.text || ''}"`;
+            
+            // Issue Tags
+            const tagsContainer = clone.querySelector('.review-tags');
+            if (review.issue_tags && Array.isArray(review.issue_tags)) {
+                review.issue_tags.forEach((tag, idx) => {
+                    const tagSpan = document.createElement('span');
+                    tagSpan.textContent = tag;
+                    
+                    // Assign slightly different styles for visual variety
+                    if (rating <= 2 && idx === 0) {
+                        tagSpan.className = "px-space-xs py-0.5 rounded bg-error-container text-on-error-container font-label-sm text-label-sm";
+                    } else if (rating === 5 && idx === 0) {
+                        tagSpan.className = "px-space-xs py-0.5 rounded bg-tertiary-container/60 text-on-tertiary-container font-label-sm text-label-sm";
+                    } else if (idx % 2 === 0) {
+                        tagSpan.className = "px-space-xs py-0.5 rounded bg-surface-container text-on-surface-variant font-label-sm text-label-sm";
+                    } else {
+                        tagSpan.className = "px-space-xs py-0.5 rounded bg-surface-container-low text-secondary font-label-sm text-label-sm";
+                    }
+                    tagsContainer.appendChild(tagSpan);
+                });
+            }
+            
+            voiceContainer.appendChild(clone);
+        });
+    }
 }
 
 function animateValue(id, start, end, duration) {

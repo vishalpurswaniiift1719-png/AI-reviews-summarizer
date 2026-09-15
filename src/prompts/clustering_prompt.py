@@ -47,3 +47,25 @@ Return ONLY valid JSON matching the schema below. Do not include markdown code b
 """
 
 ACTION_PROMPT = ChatPromptTemplate.from_template(ACTION_PROMPT_TEMPLATE)
+
+
+# -----------------------------------------------------------------------------
+# Ranking Prompt
+# -----------------------------------------------------------------------------
+RANKING_PROMPT_TEMPLATE = """You are an expert UX Researcher analyzing app reviews for the Noon Buyer App.
+From the provided corpus of reviews, select exactly 3 reviews that provide the most detailed, actionable, and useful feedback. 
+Ensure the 3 selected reviews cover distinctly different issues or topics.
+
+CONSTRAINTS:
+1. Return exactly 3 selected reviews.
+2. For each, extract its exact 'id'.
+3. For each, provide exactly 3 short 'issue_tags' (e.g., 'Delivery Delay', 'App Crash', 'Payment Failed').
+4. For each, provide a 1-sentence 'reason_for_selection' explaining why it is a high-value review.
+
+REVIEWS:
+{reviews_json}
+
+Return ONLY valid JSON matching the schema below. Do not include markdown code blocks.
+"""
+
+RANKING_PROMPT = ChatPromptTemplate.from_template(RANKING_PROMPT_TEMPLATE)

@@ -7,7 +7,7 @@ import logging
 from langchain_core.tools import tool
 
 from src.config import PROCESSED_DIR, DATA_DIR
-from src.chains.theme_chain import run_theme_clustering, run_action_generation
+from src.chains.theme_chain import run_theme_clustering, run_action_generation, run_review_ranking
 
 logger = logging.getLogger(__name__)
 
@@ -56,10 +56,30 @@ def cluster_themes() -> str:
     except Exception as e:
         return f"Error during action generation: {e}"
         
-    # 4. Save results
+    # 4. Rank top 3 most useful reviews
+    try:
+        top_reviews_ranked = run_review_ranking(cleaned_reviews)
+    except Exception as e:
+        logger.warning(f"Error during review ranking: {e}")
+        top_reviews_ranked = []
+        
+    # Merge ranked reviews with full review data
+    top_reviews_full = []
+    for tr in top_reviews_ranked:
+        # find matching review in cleaned_reviews
+        match = next((r for r in cleaned_reviews if r.get("id") == tr.get("id")), None)
+        if match:
+            # Combine the tag/reason from LLM with the raw review data
+            merged = {**match, "issue_tags": tr.get("issue_tags", []), "reason_for_selection": tr.get("reason_for_selection", "")}
+            top_reviews_full.append(merged)
+        else:
+            logger.warning(f"Could not find matching review for id {tr.get('id')}")
+
+    # 5. Save results
     result_data = {
         "themes": top_3_themes,
         "actions": actions,
+        "top_reviews": top_reviews_full,
         "metadata": {
             "total_reviews_analyzed": len(cleaned_reviews)
         }

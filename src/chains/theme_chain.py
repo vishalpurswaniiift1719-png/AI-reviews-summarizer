@@ -12,7 +12,7 @@ from langchain_core.output_parsers import JsonOutputParser
 from fuzzywuzzy import fuzz
 
 from src.config import GEMINI_API_KEY
-from src.prompts.clustering_prompt import CLUSTERING_PROMPT, ACTION_PROMPT
+from src.prompts.clustering_prompt import CLUSTERING_PROMPT, ACTION_PROMPT, RANKING_PROMPT
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +35,14 @@ class Action(BaseModel):
 
 class ActionOutput(BaseModel):
     actions: List[Action] = Field(description="Exactly 3 action items")
+
+class TopReview(BaseModel):
+    id: str = Field(description="The exact ID of the selected review")
+    issue_tags: List[str] = Field(description="Exactly 3 short issue tags")
+    reason_for_selection: str = Field(description="1-sentence reason why this review is highly useful")
+
+class TopReviewsOutput(BaseModel):
+    top_reviews: List[TopReview] = Field(description="Exactly 3 top reviews")
 
 
 # -----------------------------------------------------------------------------
@@ -159,3 +167,34 @@ def run_action_generation(top_themes: List[Dict[str, Any]]) -> List[Dict[str, An
         actions = actions[:3]
         
     return actions
+
+
+def run_review_ranking(reviews: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Run the ranking chain to select the top 3 most useful reviews."""
+    llm = get_llm()
+    parser = JsonOutputParser(pydantic_object=TopReviewsOutput)
+    
+    chain = RANKING_PROMPT | llm | parser
+    
+    # Simplify input to reduce tokens
+    simplified_reviews = [
+        {"id": r["id"], "text": r["text"], "rating": r.get("rating")} for r in reviews
+    ]
+    
+    logger.info("Invoking Gemini for top reviews ranking...")
+    try:
+        result = chain.invoke({
+            "reviews_json": json.dumps(simplified_reviews, ensure_ascii=False),
+            "format_instructions": parser.get_format_instructions()
+        })
+    except Exception as e:
+        logger.error(f"LLM ranking failed: {e}")
+        raise
+        
+    top_reviews = result.get("top_reviews", [])
+    
+    # Enforce constraint: exactly 3 reviews
+    if len(top_reviews) > 3:
+        top_reviews = top_reviews[:3]
+        
+    return top_reviews
