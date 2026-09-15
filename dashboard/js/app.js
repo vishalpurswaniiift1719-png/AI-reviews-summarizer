@@ -43,21 +43,36 @@ function renderDashboard(data) {
     const themeTemplate = document.getElementById('theme-card-template');
     themesContainer.innerHTML = '';
     
-    // Sort themes by count descending to get top 3
-    const sortedThemes = Object.entries(data.themes || {})
-        .sort((a, b) => (b[1].count || 0) - (a[1].count || 0))
+    const themesList = (data.themes && data.themes.themes) ? data.themes.themes : [];
+    
+    // Sort themes by review_count descending to get top 3
+    const sortedThemes = themesList
+        .sort((a, b) => (b.review_count || 0) - (a.review_count || 0))
         .slice(0, 3);
         
-    sortedThemes.forEach(([themeName, themeData]) => {
+    // Extract actions from markdown_pulse
+    const markdown = data.markdown_pulse || "";
+    const actionRegex = /💡 \*\*Action:\*\* (.*?)(?:\n|$)/g;
+    let match;
+    const extractedActions = [];
+    while ((match = actionRegex.exec(markdown)) !== null) {
+        extractedActions.push(match[1].trim());
+    }
+
+    sortedThemes.forEach((theme, index) => {
         const clone = themeTemplate.content.cloneNode(true);
         
+        const themeName = theme.theme_name || theme.name || "Unknown Theme";
         clone.querySelector('.theme-name').textContent = themeName;
-        clone.querySelector('.theme-share').textContent = `${themeData.share || 0}% share`;
-        clone.querySelector('.theme-mentions').textContent = `${themeData.count || 0} Mentions`;
-        clone.querySelector('.theme-quote').textContent = `"${themeData.quote || 'No quote available.'}"`;
-        clone.querySelector('.theme-bar').style.width = `${themeData.share || 0}%`;
+        clone.querySelector('.theme-share').textContent = `${theme.share || 0}% share`;
+        clone.querySelector('.theme-mentions').textContent = `${theme.review_count || 0} Mentions`;
+        clone.querySelector('.theme-quote').textContent = `"${theme.representative_quote || 'No quote available.'}"`;
+        clone.querySelector('.theme-bar').style.width = `${theme.share || 0}%`;
         
         themesContainer.appendChild(clone);
+        
+        // Save action onto the theme object for the next step
+        theme.action = extractedActions[index] || "Review markdown for action details.";
     });
 
     // 4. Render Actions
@@ -65,11 +80,12 @@ function renderDashboard(data) {
     const actionTemplate = document.getElementById('action-item-template');
     actionsContainer.innerHTML = '';
     
-    sortedThemes.forEach(([themeName, themeData]) => {
-        if (themeData.action) {
+    sortedThemes.forEach(theme => {
+        if (theme.action) {
             const clone = actionTemplate.content.cloneNode(true);
+            const themeName = theme.theme_name || theme.name || "Unknown Theme";
             clone.querySelector('.action-theme-name').textContent = `ACTION · ${themeName}`;
-            clone.querySelector('.action-desc').textContent = themeData.action;
+            clone.querySelector('.action-desc').textContent = theme.action;
             actionsContainer.appendChild(clone);
         }
     });
